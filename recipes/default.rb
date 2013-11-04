@@ -20,6 +20,7 @@ directory "/var/www" do
   group "root"
   mode 00755
   action :create
+  not_if {File.exists?("/var/www")}
 end
 
 template "/var/www/index.html" do
@@ -27,7 +28,7 @@ template "/var/www/index.html" do
   owner "root"
   group "root"
   mode "00644"
-  not_if {File.exists?("/var/www")}
+  only_if {File.exists?("/var/www")}
 end
 
 package "snmpd" do
@@ -49,6 +50,19 @@ end
 %w{libxslt1.1 libyaml-0-2}.each do |pkgs|
   package pkgs do
     action :install
+  end
+end
+
+execute "install_openssl" do
+  command "dpkg -i /tmp/libssl0.9.8_0.9.8o-4squeeze14_amd64.deb"
+  action :nothing
+end
+
+case node[:platform_version]
+when "7.1","7.2"
+  remote_file "/tmp/libssl0.9.8_0.9.8o-4squeeze14_amd64.deb" do
+    source "http://ftp.us.debian.org/debian/pool/main/o/openssl/libssl0.9.8_0.9.8o-4squeeze14_amd64.deb"
+    notifies :run, "execute[install_openssl]", :immediately
   end
 end
 
