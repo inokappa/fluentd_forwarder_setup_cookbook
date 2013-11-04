@@ -63,6 +63,7 @@ when "7.1","7.2"
   remote_file "/tmp/libssl0.9.8_0.9.8o-4squeeze14_amd64.deb" do
     source "http://ftp.us.debian.org/debian/pool/main/o/openssl/libssl0.9.8_0.9.8o-4squeeze14_amd64.deb"
     notifies :run, "execute[install_openssl]", :immediately
+    not_if {File.exists?("/usr/lib/libssl.so.0.9.8")}
   end
 end
 
